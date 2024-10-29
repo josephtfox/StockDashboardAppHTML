@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        #chart { width: 100%; height: 400px; }
+        .info-box { display: inline-block; margin: 10px; padding: 10px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Stock Dashboard</h1>
+    <input type="text" id="ticker" placeholder="Enter stock ticker">
+    <select id="period">
+        <option value="1mo">1 Month</option>
+        <option value="3mo">3 Months</option>
+        <option value="6mo">6 Months</option>
+        <option value="1y">1 Year</option>
+    </select>
+    <button onclick="getStockData()">Get Data</button>
+    <div id="chart"></div>
+    <div id="info"></div>
+
+    <script>
+        function getStockData() {
+            const ticker = $('#ticker').val();
+            const period = $('#period').val();
+            $.post('{% url "get_stock_data" %}', {
+                ticker: ticker,
+                period: period,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            }, function(data) {
+                Plotly.newPlot('chart', JSON.parse(data.chart));
+                $('#info').html(`
+                    <div class="info-box">Name: ${data.info.name}</div>
+                    <div class="info-box">Price: $${parseFloat(data.info.price).toFixed(2)}</div>
+                    <div class="info-box">Change: ${data.info.change}</div>
+                    <div class="info-box">Avg Volume: ${parseInt(data.info.volume).toLocaleString()}</div>
+                `);
+            });
+        }
+    </script>
+</body>
+</html>

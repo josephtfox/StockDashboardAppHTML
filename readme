@@ -1,0 +1,5 @@
+To start the Web App:
+
+cd .\dashboard_project\
+python manage.py migrate
+python manage.py runserver
